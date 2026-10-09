@@ -34,38 +34,63 @@ public class UserService {
     }
 
 
-    public UserResponse register(UserRegisterRequest request){
-        String email=request.email().trim().toLowerCase();
+    public RegistrationResult register(UserRegisterRequest request) {
+        String email = request.email().trim().toLowerCase(Locale.ROOT);
 
-        if(userRepository.existsByEmail(email)){
+        if (userRepository.existsByEmail(email)) {
             throw new DuplicateResourceException("Email is already registered.");
         }
 
-        User user=new User();
-
+        User user = new User();
         user.setEmail(email);
         user.setPasswordHash(passwordEncoder.encode(request.password()));
         user.setFirstName(request.firstName().trim());
         user.setLastName(request.lastName().trim());
         user.setPreferredCurrency(request.preferredCurrency());
 
-        return userMapper.toResponse(userRepository.save(user));
+        User savedUser = userRepository.save(user);
+
+        String token = jwtService.generateToken(
+                savedUser.getId(),
+                savedUser.getEmail(),
+                false
+        );
+
+        long expiresIn = jwtService.getExpirationMillis(false) / 1000;
+
+        return new RegistrationResult(
+                userMapper.toResponse(savedUser),
+                token,
+                expiresIn
+        );
     }
 
-    public LoginResult login(UserLoginRequest request){
-        String email=request.email().trim().toLowerCase(Locale.ROOT);
 
-        User user=userRepository.findByEmail(email)
-                .orElseThrow(()->new InvalidCredentialsException("Invalid email or password"));
+    public LoginResult login(UserLoginRequest request) {
+        String email = request.email().trim().toLowerCase(Locale.ROOT);
 
-        if(!passwordEncoder.matches(request.password(), user.getPasswordHash())){
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new InvalidCredentialsException(
+                        "Invalid email or password"
+                ));
+
+        if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
             throw new InvalidCredentialsException("Invalid email or password");
         }
 
-        String token = jwtService.generateToken(user.getId(),user.getEmail());
+        boolean rememberMe = request.rememberMe();
 
-        return new LoginResult(token, jwtService.getExpirationMillis() / 1000);
+        String token = jwtService.generateToken(
+                user.getId(),
+                user.getEmail(),
+                rememberMe
+        );
+
+        long expiresIn = jwtService.getExpirationMillis(rememberMe) / 1000;
+
+        return new LoginResult(token, expiresIn);
     }
+
 
     public UserResponse getCurrentUser(UUID userId) {
         User user=userRepository.findById(userId)

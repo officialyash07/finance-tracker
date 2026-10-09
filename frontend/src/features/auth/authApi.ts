@@ -1,15 +1,11 @@
 import axios from "axios";
 
 import type { User } from "../../types/user";
-
-interface LoginRequest {
-    email: string;
-    password: string;
-}
-
-interface LoginResponse {
-    expiresIn: number;
-}
+import type {
+    LoginRequest,
+    LoginResponse,
+    RegisterRequest,
+} from "../../types/auth";
 
 export const loginUser = async (
     credentials: LoginRequest,
@@ -32,4 +28,24 @@ export const getCurrentUser = async (): Promise<User> => {
     );
 
     return response.data;
+};
+
+export const registerUser = async (data: RegisterRequest): Promise<User> => {
+    const response = await axios.post<User>(
+        `${import.meta.env.VITE_API_BASE_URL}/auth/register`,
+        data,
+        {
+            withCredentials: true,
+        },
+    );
+
+    return response.data;
+};
+
+export const logoutUser = async (): Promise<void> => {
+    await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/auth/logout`,
+        {},
+        { withCredentials: true },
+    );
 };

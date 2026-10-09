@@ -1,14 +1,11 @@
 import { useMutation } from "@tanstack/react-query";
+
 import { getCurrentUser, loginUser } from "./authApi";
 import type { User } from "../../types/user";
-
-interface LoginCredentials {
-    email: string;
-    password: string;
-}
+import type { LoginRequest } from "../../types/auth";
 
 export const useLogin = () => {
-    return useMutation<User, Error, LoginCredentials>({
+    return useMutation<User, Error, LoginRequest>({
         mutationFn: async (credentials) => {
             await loginUser(credentials);
 

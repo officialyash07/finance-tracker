@@ -1,9 +1,6 @@
 package com.pathik.financetracker.controller;
 
-import com.pathik.financetracker.dto.auth.LoginResponse;
-import com.pathik.financetracker.dto.auth.UserLoginRequest;
-import com.pathik.financetracker.dto.auth.UserRegisterRequest;
-import com.pathik.financetracker.dto.auth.UserResponse;
+import com.pathik.financetracker.dto.auth.*;
 import com.pathik.financetracker.service.LoginResult;
 import com.pathik.financetracker.service.UserService;
 import jakarta.servlet.http.Cookie;
@@ -30,14 +27,29 @@ public class AuthController {
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public UserResponse register(@Valid @RequestBody UserRegisterRequest request) {
+    public UserResponse register(
+            @Valid @RequestBody UserRegisterRequest request,
+            HttpServletResponse response
+    ) {
+        RegistrationResult result = userService.register(request);
 
-        return userService.register(request);
+        Cookie cookie = new Cookie(ACCESS_TOKEN_COOKIE, result.accessToken());
+        cookie.setHttpOnly(true);
+        cookie.setSecure(cookieSecure);
+        cookie.setPath("/");
+        cookie.setMaxAge(Math.toIntExact(result.expiresIn()));
+
+        response.addCookie(cookie);
+
+        return result.user();
     }
 
-    @PostMapping("/login")
-    public LoginResponse login(@Valid @RequestBody UserLoginRequest request, HttpServletResponse response) {
 
+    @PostMapping("/login")
+    public LoginResponse login(
+            @Valid @RequestBody UserLoginRequest request,
+            HttpServletResponse response
+    ) {
         LoginResult result = userService.login(request);
 
         Cookie cookie = new Cookie(ACCESS_TOKEN_COOKIE, result.accessToken());
@@ -45,7 +57,7 @@ public class AuthController {
         cookie.setHttpOnly(true);
         cookie.setSecure(cookieSecure);
         cookie.setPath("/");
-        cookie.setMaxAge((int) result.expiresIn());
+        cookie.setMaxAge(Math.toIntExact(result.expiresIn()));
 
         response.addCookie(cookie);
 

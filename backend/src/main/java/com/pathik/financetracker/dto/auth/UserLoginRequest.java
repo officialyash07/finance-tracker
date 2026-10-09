@@ -13,6 +13,8 @@ public record UserLoginRequest(
 
         @NotBlank
         @Size(min = 8, max = 100)
-        String password
+        String password,
+
+        boolean rememberMe
 ) {
 }

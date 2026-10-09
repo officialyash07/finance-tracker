@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, LockKeyhole, ShieldCheck } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
@@ -8,19 +7,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useLogin } from "./useLogin";
 import { useAppDispatch } from "../../store/hooks";
 import { setAuthenticatedUser } from "./authSlice";
-
-const loginSchema = z.object({
-    email: z.email({
-        error: "Please enter a valid email address",
-    }),
-
-    password: z
-        .string()
-        .min(1, "Password is required")
-        .min(8, "Password must be at least 8 characters"),
-});
-
-type LoginFormData = z.infer<typeof loginSchema>;
+import { loginSchema, type LoginFormData } from "./loginSchema";
 
 const LoginPage = () => {
     const [showPassword, setShowPassword] = useState(false);
@@ -38,6 +25,7 @@ const LoginPage = () => {
         defaultValues: {
             email: "",
             password: "",
+            rememberMe: false,
         },
     });
 
@@ -200,7 +188,7 @@ const LoginPage = () => {
                                         <span className="relative h-6 w-6 shrink-0">
                                             <input
                                                 type="checkbox"
-                                                defaultChecked
+                                                {...register("rememberMe")}
                                                 className="peer absolute inset-0 h-6 w-6 cursor-pointer appearance-none rounded-md border border-border-strong bg-white transition-colors checked:border-ink-900 checked:bg-ink-900"
                                             />
 
