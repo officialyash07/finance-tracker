@@ -4,6 +4,7 @@ import PlaceholderPage from "../pages/PlaceholderPage";
 import LoginPage from "../features/auth/LoginPage";
 import AppLayout from "../layouts/AppLayout";
 import AuthLayout from "../layouts/AuthLayout";
+import ProtectedRoute from "./ProtectedRoute";
 
 export const router = createBrowserRouter([
     {
@@ -19,37 +20,40 @@ export const router = createBrowserRouter([
             },
         ],
     },
-
     {
-        element: <AppLayout />,
+        element: <ProtectedRoute />,
         children: [
             {
-                path: "/dashboard",
-                element: <PlaceholderPage title="Dashboard" />,
-            },
-            {
-                path: "/transactions",
-                element: <PlaceholderPage title="Transactions" />,
-            },
-            {
-                path: "/transactions/new",
-                element: <PlaceholderPage title="New Transaction" />,
-            },
-            {
-                path: "/transactions/:id/edit",
-                element: <PlaceholderPage title="Edit Transaction" />,
-            },
-            {
-                path: "/categories",
-                element: <PlaceholderPage title="Categories" />,
-            },
-            {
-                path: "/profile",
-                element: <PlaceholderPage title="Profile" />,
+                element: <AppLayout />,
+                children: [
+                    {
+                        path: "/dashboard",
+                        element: <PlaceholderPage title="Dashboard" />,
+                    },
+                    {
+                        path: "/transactions",
+                        element: <PlaceholderPage title="Transactions" />,
+                    },
+                    {
+                        path: "/transactions/new",
+                        element: <PlaceholderPage title="New Transaction" />,
+                    },
+                    {
+                        path: "/transactions/:id/edit",
+                        element: <PlaceholderPage title="Edit Transaction" />,
+                    },
+                    {
+                        path: "/categories",
+                        element: <PlaceholderPage title="Categories" />,
+                    },
+                    {
+                        path: "/profile",
+                        element: <PlaceholderPage title="Profile" />,
+                    },
+                ],
             },
         ],
     },
-
     {
         path: "/",
         element: <Navigate to="/login" replace />,

@@ -5,11 +5,13 @@ import type { User } from "../../types/user";
 interface AuthState {
     user: User | null;
     isAuthenticated: boolean;
+    isInitialized: boolean;
 }
 
 const initialState: AuthState = {
     user: null,
     isAuthenticated: false,
+    isInitialized: false,
 };
 
 const authSlice = createSlice({
@@ -25,9 +27,14 @@ const authSlice = createSlice({
             state.user = null;
             state.isAuthenticated = false;
         },
+
+        setAuthInitialized: (state) => {
+            state.isInitialized = true;
+        },
     },
 });
 
-export const { setAuthenticatedUser, clearAuthentication } = authSlice.actions;
+export const { setAuthenticatedUser, clearAuthentication, setAuthInitialized } =
+    authSlice.actions;
 
 export default authSlice.reducer;
