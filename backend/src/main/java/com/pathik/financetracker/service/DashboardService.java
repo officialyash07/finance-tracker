@@ -20,68 +20,142 @@ public class DashboardService {
     private final TransactionRepository transactionRepository;
     private final TransactionMapper transactionMapper;
 
-    public DashboardService(TransactionRepository transactionRepository, TransactionMapper transactionMapper) {
+    public DashboardService(
+            TransactionRepository transactionRepository,
+            TransactionMapper transactionMapper
+    ) {
         this.transactionRepository = transactionRepository;
         this.transactionMapper = transactionMapper;
     }
 
-    public DashboardSummaryResponse getSummary(UUID userId){
-        BigDecimal totalIncome=transactionRepository.sumAmountByUserIdAndType(userId, TransactionType.INCOME);
+    public DashboardSummaryResponse getSummary(UUID userId) {
+        BigDecimal totalIncome =
+                transactionRepository.sumAmountByUserIdAndType(
+                        userId,
+                        TransactionType.INCOME
+                );
 
-        BigDecimal totalExpense=transactionRepository.sumAmountByUserIdAndType(userId, TransactionType.EXPENSE);
+        BigDecimal totalExpense =
+                transactionRepository.sumAmountByUserIdAndType(
+                        userId,
+                        TransactionType.EXPENSE
+                );
 
-        BigDecimal balance=totalIncome.subtract(totalExpense);
+        BigDecimal balance = totalIncome.subtract(totalExpense);
 
-        return new DashboardSummaryResponse(totalIncome,totalExpense,balance);
+        return new DashboardSummaryResponse(
+                totalIncome,
+                totalExpense,
+                balance
+        );
     }
 
-    public List<MonthlySummaryResponse> getMonthlySummary(UUID userId, int year){
-        List<Object[]> rows=transactionRepository.findMonthlyTotals(userId, year);
+    public List<MonthlySummaryResponse> getMonthlySummary(
+            UUID userId,
+            int year
+    ) {
+        List<Object[]> totalRows =
+                transactionRepository.findMonthlyTotals(userId, year);
 
-        Map<Integer, BigDecimal> incomeByMonth=new HashMap<>();
-        Map<Integer, BigDecimal> expenseByMonth=new HashMap<>();
+        Map<Integer, BigDecimal> incomeByMonth = new HashMap<>();
+        Map<Integer, BigDecimal> expenseByMonth = new HashMap<>();
 
-        for (Object[] row:rows){
-            int month=((Number) row[0]).intValue();
-            TransactionType type= (TransactionType) row[1];
-            BigDecimal total=(BigDecimal) row[2];
+        for (Object[] row : totalRows) {
+            int month = ((Number) row[0]).intValue();
+            TransactionType type = (TransactionType) row[1];
+            BigDecimal total = (BigDecimal) row[2];
 
-            if(type==TransactionType.INCOME){
-                incomeByMonth.put(month,total);
-            }else{
-                expenseByMonth.put(month,total);
+            if (type == TransactionType.INCOME) {
+                incomeByMonth.put(month, total);
+            } else {
+                expenseByMonth.put(month, total);
             }
         }
 
-        List<MonthlySummaryResponse> result=new ArrayList<>();
+        List<Object[]> countRows =
+                transactionRepository.countMonthlyTransactionsByUserId(
+                        userId,
+                        year
+                );
 
-        for(int month=1; month<=12; month++){
-            BigDecimal income=incomeByMonth.getOrDefault(month, BigDecimal.ZERO);
+        Map<Integer, Long> incomeCountByMonth = new HashMap<>();
+        Map<Integer, Long> expenseCountByMonth = new HashMap<>();
 
-            BigDecimal expense=expenseByMonth.getOrDefault(month, BigDecimal.ZERO);
+        for (Object[] row : countRows) {
+            int month = ((Number) row[0]).intValue();
+            TransactionType type = (TransactionType) row[1];
+            long count = ((Number) row[2]).longValue();
 
-            result.add(new MonthlySummaryResponse(month, income, expense, income.subtract(expense)));
+            if (type == TransactionType.INCOME) {
+                incomeCountByMonth.put(month, count);
+            } else {
+                expenseCountByMonth.put(month, count);
+            }
+        }
+
+        List<MonthlySummaryResponse> result = new ArrayList<>();
+
+        for (int month = 1; month <= 12; month++) {
+            BigDecimal income =
+                    incomeByMonth.getOrDefault(month, BigDecimal.ZERO);
+
+            BigDecimal expense =
+                    expenseByMonth.getOrDefault(month, BigDecimal.ZERO);
+
+            long incomeCount =
+                    incomeCountByMonth.getOrDefault(month, 0L);
+
+            long expenseCount =
+                    expenseCountByMonth.getOrDefault(month, 0L);
+
+            result.add(
+                    new MonthlySummaryResponse(
+                            month,
+                            income,
+                            expense,
+                            income.subtract(expense),
+                            incomeCount,
+                            expenseCount
+                    )
+            );
         }
 
         return result;
     }
 
-    public List<CategorySummaryResponse> getCategorySummary(UUID userId, int year, int month){
-        List<Object[]> rows=transactionRepository.findCategoryTotals(userId,TransactionType.EXPENSE,year,month);
+    public List<CategorySummaryResponse> getCategorySummary(
+            UUID userId,
+            int year,
+            int month
+    ) {
+        List<Object[]> rows =
+                transactionRepository.findCategoryTotals(
+                        userId,
+                        TransactionType.EXPENSE,
+                        year,
+                        month
+                );
 
-        return rows.stream().map(row->new CategorySummaryResponse(
-                (UUID) row[0],
-                (String) row[1],
-                (BigDecimal) row[2]
-        )).toList();
+        return rows.stream()
+                .map(row -> new CategorySummaryResponse(
+                        (UUID) row[0],
+                        (String) row[1],
+                        (BigDecimal) row[2]
+                ))
+                .toList();
     }
 
-    public List<TransactionResponse> getRecentTransactions(UUID userId, int limit){
-        Pageable pageable= PageRequest.of(0,limit);
+    public List<TransactionResponse> getRecentTransactions(
+            UUID userId,
+            int limit
+    ) {
+        Pageable pageable = PageRequest.of(0, limit);
 
-        return transactionRepository.findRecentTransactions(userId,pageable)
+        return transactionRepository
+                .findRecentTransactions(userId, pageable)
                 .stream()
                 .map(transactionMapper::toResponse)
                 .toList();
     }
 }
+

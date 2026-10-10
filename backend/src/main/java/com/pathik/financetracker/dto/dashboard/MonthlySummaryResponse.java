@@ -6,6 +6,9 @@ public record MonthlySummaryResponse(
         int month,
         BigDecimal totalIncome,
         BigDecimal totalExpense,
-        BigDecimal balance
+        BigDecimal balance,
+        long incomeTransactionCount,
+        long expenseTransactionCount
 ) {
 }
+

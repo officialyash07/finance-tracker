@@ -99,4 +99,16 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
         ORDER BY t.transactionDate DESC, t.createdAt DESC
         """)
     List<Transaction> findRecentTransactions(@Param("userId") UUID userId, Pageable pageable);
+
+    @Query("""
+        SELECT MONTH(t.transactionDate), t.transactionType, COUNT(t)
+        FROM Transaction t
+        WHERE t.user.id = :userId
+          AND YEAR(t.transactionDate) = :year
+        GROUP BY MONTH(t.transactionDate), t.transactionType
+        """)
+    List<Object[]> countMonthlyTransactionsByUserId(
+            @Param("userId") UUID userId,
+            @Param("year") int year
+    );
 }
