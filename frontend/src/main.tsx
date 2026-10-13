@@ -8,7 +8,15 @@ import App from "./App.tsx";
 import { store } from "./store/store.ts";
 import AuthInitializer from "./features/auth/AuthInitializer.tsx";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            staleTime: 30_000,
+            refetchOnWindowFocus: false,
+            retry: 1,
+        },
+    },
+});
 
 createRoot(document.getElementById("root")!).render(
     <StrictMode>

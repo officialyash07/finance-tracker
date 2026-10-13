@@ -15,7 +15,7 @@ import type {
 export const useTransaction = (transactionId: string) =>
     useQuery({
         queryKey: ["transaction", transactionId],
-        queryFn: () => getTransactionById(transactionId),
+        queryFn: ({ signal }) => getTransactionById(transactionId, signal),
         enabled: Boolean(transactionId),
         retry: false,
     });

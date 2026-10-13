@@ -2,11 +2,9 @@ import { ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 
-import { useCategorySummary } from "./useDashboard";
+import { useAllTimeCategorySummary } from "./useDashboard";
 
 interface SpendingByCategoryProps {
-    year: number;
-    month: number;
     currency: string;
 }
 
@@ -29,11 +27,9 @@ const formatCurrency = (amount: number, currency: string) =>
     }).format(amount);
 
 const SpendingByCategory = ({
-    year,
-    month,
     currency,
 }: SpendingByCategoryProps) => {
-    const query = useCategorySummary(year, month);
+    const query = useAllTimeCategorySummary();
 
     const categories = (query.data ?? [])
         .filter((category) => category.totalAmount > 0)
@@ -54,7 +50,7 @@ const SpendingByCategory = ({
         <section className="min-w-0 overflow-hidden rounded-2xl border border-border bg-white shadow-xs">
             <header className="flex items-center justify-between gap-3 border-b border-border px-5 py-5 sm:px-6">
                 <h2 className="text-base font-semibold text-ink-950 sm:text-lg">
-                    Spending by category
+                    All-time spending by category
                 </h2>
 
                 <Link

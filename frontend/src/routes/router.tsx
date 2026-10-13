@@ -1,16 +1,18 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 
-import LoginPage from "../features/auth/LoginPage";
-import RegisterPage from "../features/auth/RegisterPage";
-import DashboardPage from "../features/dashboard/DashboardPage";
 import AppLayout from "../layouts/AppLayout";
 import AuthLayout from "../layouts/AuthLayout";
 import ProtectedRoute from "./ProtectedRoute";
-import EditTransactionPage from "../features/transactions/EditTransactionPage";
-import TransactionsPage from "../features/transactions/TransactionsPage";
-import NewTransactionPage from "../features/transactions/NewTransactionPage";
-import CategoriesPage from "../features/categories/CategoriesPage";
-import ProfilePage from "../features/profile/ProfilePage";
+import {
+    CategoriesPage,
+    DashboardPage,
+    EditTransactionPage,
+    LoginPage,
+    NewTransactionPage,
+    ProfilePage,
+    RegisterPage,
+    TransactionsPage,
+} from "./lazyPages";
 
 export const router = createBrowserRouter([
     {

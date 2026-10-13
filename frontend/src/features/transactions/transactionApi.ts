@@ -37,6 +37,7 @@ export interface TransactionFilters {
 
 export const getTransactions = async (
     filters: TransactionFilters = {},
+    signal?: AbortSignal,
 ): Promise<TransactionPageResponse> => {
     const { page = 0, size = 10, ...filterParams } = filters;
 
@@ -48,6 +49,7 @@ export const getTransactions = async (
                 page,
                 size,
             },
+            signal,
         },
     );
 
@@ -56,6 +58,7 @@ export const getTransactions = async (
 
 export const getAllMatchingTransactions = async (
     filters: Omit<TransactionFilters, "page" | "size"> = {},
+    signal?: AbortSignal,
 ): Promise<Transaction[]> => {
     const pageSize = 100;
 
@@ -63,7 +66,7 @@ export const getAllMatchingTransactions = async (
         ...filters,
         page: 0,
         size: pageSize,
-    });
+    }, signal);
 
     const transactions = [...firstPage.content];
 
@@ -72,7 +75,7 @@ export const getAllMatchingTransactions = async (
             ...filters,
             page,
             size: pageSize,
-        });
+        }, signal);
 
         transactions.push(...result.content);
     }
@@ -82,9 +85,11 @@ export const getAllMatchingTransactions = async (
 
 export const getTransactionById = async (
     transactionId: string,
+    signal?: AbortSignal,
 ): Promise<Transaction> => {
     const response = await apiClient.get<Transaction>(
         `/transactions/${transactionId}`,
+        { signal },
     );
 
     return response.data;

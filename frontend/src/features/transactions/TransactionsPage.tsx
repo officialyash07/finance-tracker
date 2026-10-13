@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
     ArrowDown,
     ArrowDownLeft,
@@ -25,6 +25,7 @@ import TransactionCategoryIcon from "./TransactionCategoryIcon";
 import { useDeleteTransaction } from "./useTransaction";
 import { useAppSelector } from "../../store/hooks";
 import { formatCurrency } from "../../utils/currency";
+import { useDebouncedValue } from "../../utils/useDebouncedValue";
 
 import type { Transaction, TransactionType } from "../../types/transaction";
 import type { Category } from "../../types/category";
@@ -204,7 +205,6 @@ function SortSelect({
 
 function TransactionsPage() {
     const navigate = useNavigate();
-    const queryClient = useQueryClient();
     const deleteMutation = useDeleteTransaction();
     const currency =
         useAppSelector((state) => state.auth.user?.preferredCurrency) || "INR";
@@ -224,17 +224,20 @@ function TransactionsPage() {
     const [actionError, setActionError] = useState("");
 
     const categoriesQuery = useCategories();
+    const debouncedSearch = useDebouncedValue(search, 200);
+    const debouncedFromDate = useDebouncedValue(fromDate);
+    const debouncedToDate = useDebouncedValue(toDate);
 
     const activeDateRange = useMemo(() => {
         if (datePreset === "custom") {
             return {
-                fromDate: fromDate || undefined,
-                toDate: toDate || undefined,
+                fromDate: debouncedFromDate || undefined,
+                toDate: debouncedToDate || undefined,
             };
         }
 
         return getDateRange(datePreset);
-    }, [datePreset, fromDate, toDate]);
+    }, [datePreset, debouncedFromDate, debouncedToDate]);
 
     const filters = useMemo<TransactionFilters>(
         () => ({
@@ -247,13 +250,13 @@ function TransactionsPage() {
 
     const transactionsQuery = useQuery({
         queryKey: ["transactions", "all-matching", filters],
-        queryFn: () => getAllMatchingTransactions(filters),
+        queryFn: ({ signal }) => getAllMatchingTransactions(filters, signal),
         staleTime: 30_000,
         retry: false,
     });
 
     const filteredTransactions = useMemo(() => {
-        const normalizedSearch = search.trim().toLowerCase();
+        const normalizedSearch = debouncedSearch.trim().toLowerCase();
 
         const matching = (transactionsQuery.data ?? []).filter(
             (transaction) => {
@@ -285,7 +288,7 @@ function TransactionsPage() {
                 b.createdAt.localeCompare(a.createdAt)
             );
         });
-    }, [transactionsQuery.data, search, sort]);
+    }, [transactionsQuery.data, debouncedSearch, sort]);
 
     const totalIncome = filteredTransactions.reduce(
         (sum, transaction) =>
@@ -361,8 +364,6 @@ function TransactionsPage() {
         try {
             await deleteMutation.mutateAsync(deleteTarget.id);
             setDeleteTarget(null);
-            await queryClient.invalidateQueries({ queryKey: ["transactions"] });
-            await queryClient.invalidateQueries({ queryKey: ["dashboard"] });
         } catch {
             setActionError(
                 "Unable to delete this transaction. Please try again.",

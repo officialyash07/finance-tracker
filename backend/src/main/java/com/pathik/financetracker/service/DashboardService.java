@@ -145,6 +145,22 @@ public class DashboardService {
                 .toList();
     }
 
+    public List<CategorySummaryResponse> getAllTimeCategorySummary(UUID userId) {
+        List<Object[]> rows =
+                transactionRepository.findAllTimeCategoryTotals(
+                        userId,
+                        TransactionType.EXPENSE
+                );
+
+        return rows.stream()
+                .map(row -> new CategorySummaryResponse(
+                        (UUID) row[0],
+                        (String) row[1],
+                        (BigDecimal) row[2]
+                ))
+                .toList();
+    }
+
     public List<TransactionResponse> getRecentTransactions(
             UUID userId,
             int limit
@@ -158,4 +174,3 @@ public class DashboardService {
                 .toList();
     }
 }
-

@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 export const useCurrentUser = () => {
     return useQuery({
         queryKey: ["currentUser"],
-        queryFn: getCurrentUser,
+        queryFn: ({ signal }) => getCurrentUser(signal),
         retry: false,
     });
 };

@@ -3,9 +3,11 @@ import type { Category, CategoryType } from "../../types/category";
 
 export const getCategories = async (
     type?: CategoryType,
+    signal?: AbortSignal,
 ): Promise<Category[]> => {
     const response = await apiClient.get<Category[]>("/categories", {
         params: type ? { type } : undefined,
+        signal,
     });
 
     return response.data;

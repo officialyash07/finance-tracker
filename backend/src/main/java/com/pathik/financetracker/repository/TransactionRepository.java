@@ -91,6 +91,23 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
             @Param("month") int month
     );
 
+    @Query("""
+        SELECT
+            c.id,
+            c.name,
+            COALESCE(SUM(t.amount), 0)
+        FROM Transaction t
+        JOIN t.category c
+        WHERE t.user.id = :userId
+          AND t.transactionType = :type
+        GROUP BY c.id, c.name
+        ORDER BY SUM(t.amount) DESC
+        """)
+    List<Object[]> findAllTimeCategoryTotals(
+            @Param("userId") UUID userId,
+            @Param("type") TransactionType type
+    );
+
     @EntityGraph(attributePaths = "category")
     @Query("""
         SELECT t

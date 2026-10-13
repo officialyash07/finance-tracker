@@ -58,6 +58,13 @@ public class DashboardController {
         return dashboardService.getCategorySummary(userId, year, month);
     }
 
+    @GetMapping("/categories/all-time")
+    public List<CategorySummaryResponse> getAllTimeCategorySummary() {
+        UUID userId = SecurityUtils.getCurrentUserId();
+
+        return dashboardService.getAllTimeCategorySummary(userId);
+    }
+
     @GetMapping("/recent-transactions")
     public List<TransactionResponse> getRecentTransactions(@RequestParam(defaultValue = "5") int limit){
         if (limit < 1 || limit > 100) {

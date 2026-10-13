@@ -365,8 +365,6 @@ const DashboardPage = () => {
                 <RecentTransactions currency={currency} />
 
                 <SpendingByCategory
-                    year={selectedDate.year}
-                    month={selectedDate.month}
                     currency={currency}
                 />
             </div>

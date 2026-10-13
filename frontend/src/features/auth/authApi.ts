@@ -21,10 +21,10 @@ export const loginUser = async (
     return response.data;
 };
 
-export const getCurrentUser = async (): Promise<User> => {
+export const getCurrentUser = async (signal?: AbortSignal): Promise<User> => {
     const response = await axios.get<User>(
         `${import.meta.env.VITE_API_BASE_URL}/users/me`,
-        { withCredentials: true },
+        { withCredentials: true, signal },
     );
 
     return response.data;
