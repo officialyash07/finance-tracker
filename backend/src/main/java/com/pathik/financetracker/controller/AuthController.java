@@ -16,7 +16,7 @@ public class AuthController {
 
     private static final String ACCESS_TOKEN_COOKIE = "access_token";
 
-    @Value("${app.auth.cookie-secure}")
+    @Value("${app.auth.cookie-secure:false}")
     private boolean cookieSecure;
 
     private final UserService userService;
