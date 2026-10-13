@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
     ArrowDown,
@@ -23,6 +23,8 @@ import {
 import { useCategories } from "../categories/useCategories";
 import TransactionCategoryIcon from "./TransactionCategoryIcon";
 import { useDeleteTransaction } from "./useTransaction";
+import { useAppSelector } from "../../store/hooks";
+import { formatCurrency } from "../../utils/currency";
 
 import type { Transaction, TransactionType } from "../../types/transaction";
 import type { Category } from "../../types/category";
@@ -47,14 +49,6 @@ type SortOption =
     | "created-desc";
 
 const PAGE_SIZE = 10;
-
-const currency = (amount: number) =>
-    new Intl.NumberFormat("en-IN", {
-        style: "currency",
-        currency: "INR",
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-    }).format(amount);
 
 const formatDate = (value: string) =>
     new Date(`${value.slice(0, 10)}T00:00:00`).toLocaleDateString("en-US", {
@@ -117,7 +111,7 @@ const escapeCsv = (value: unknown): string => {
     return `"${text.replace(/"/g, '""')}"`;
 };
 
-function downloadCsv(transactions: Transaction[]) {
+function downloadCsv(transactions: Transaction[], currency: string) {
     const headers = [
         "Description",
         "Category",
@@ -133,7 +127,7 @@ function downloadCsv(transactions: Transaction[]) {
         transaction.type,
         transaction.transactionDate,
         transaction.amount,
-        "INR",
+        currency,
     ]);
 
     const csv = [headers, ...rows]
@@ -212,10 +206,13 @@ function TransactionsPage() {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const deleteMutation = useDeleteTransaction();
+    const currency =
+        useAppSelector((state) => state.auth.user?.preferredCurrency) || "INR";
 
     const [search, setSearch] = useState("");
     const [type, setType] = useState<"ALL" | TransactionType>("ALL");
-    const [categoryId, setCategoryId] = useState("");
+    const [searchParams, setSearchParams] = useSearchParams();
+    const categoryId = searchParams.get("categoryId") ?? "";
     const [datePreset, setDatePreset] = useState<DatePreset>("all-time");
     const [fromDate, setFromDate] = useState("");
     const [toDate, setToDate] = useState("");
@@ -321,18 +318,32 @@ function TransactionsPage() {
     const resetFilters = () => {
         setSearch("");
         setType("ALL");
-        setCategoryId("");
         setDatePreset("all-time");
         setFromDate("");
         setToDate("");
         setSort("date-desc");
         setPage(0);
+        setSearchParams({}, { replace: true });
     };
 
     const changeType = (nextType: "ALL" | TransactionType) => {
         setType(nextType);
-        setCategoryId("");
         setPage(0);
+        setSearchParams({}, { replace: true });
+    };
+
+    const changeCategory = (nextCategoryId: string) => {
+        setPage(0);
+
+        const nextParams = new URLSearchParams(searchParams);
+
+        if (nextCategoryId) {
+            nextParams.set("categoryId", nextCategoryId);
+        } else {
+            nextParams.delete("categoryId");
+        }
+
+        setSearchParams(nextParams, { replace: true });
     };
 
     const changeDatePreset = (nextPreset: DatePreset) => {
@@ -366,7 +377,7 @@ function TransactionsPage() {
     }, [categoriesQuery.data, type]);
 
     const exportTransactions = () => {
-        downloadCsv(filteredTransactions);
+        downloadCsv(filteredTransactions, currency);
     };
 
     const firstResult =
@@ -474,10 +485,9 @@ function TransactionsPage() {
                         <select
                             aria-label="Filter by category"
                             value={categoryId}
-                            onChange={(event) => {
-                                setCategoryId(event.target.value);
-                                setPage(0);
-                            }}
+                            onChange={(event) =>
+                                changeCategory(event.target.value)
+                            }
                             className="min-w-42.5 rounded-xl border border-border bg-surface px-3.5 py-3 text-sm outline-none focus:border-brand-600"
                         >
                             <option value="">All categories</option>
@@ -665,13 +675,13 @@ function TransactionsPage() {
                         <p className="text-ink-600">
                             Income{" "}
                             <span className="font-semibold text-emerald-700">
-                                +{currency(totalIncome)}
+                                +{formatCurrency(totalIncome, currency)}
                             </span>
                         </p>
                         <p className="text-ink-600">
                             Expenses{" "}
                             <span className="font-semibold text-ink-900">
-                                −{currency(totalExpenses)}
+                                −{formatCurrency(totalExpenses, currency)}
                             </span>
                         </p>
                         <p className="text-ink-600">
@@ -684,7 +694,10 @@ function TransactionsPage() {
                                 }`}
                             >
                                 {netTotal >= 0 ? "+" : "−"}
-                                {currency(Math.abs(netTotal))}
+                                {formatCurrency(
+                                    Math.abs(netTotal),
+                                    currency,
+                                )}
                             </span>
                         </p>
                     </div>
@@ -894,8 +907,9 @@ function TransactionsPage() {
                                                         "INCOME"
                                                             ? "+"
                                                             : "−"}
-                                                        {currency(
+                                                        {formatCurrency(
                                                             transaction.amount,
+                                                            currency,
                                                         )}
                                                     </td>
 
@@ -992,7 +1006,10 @@ function TransactionsPage() {
                                                 {transaction.type === "INCOME"
                                                     ? "+"
                                                     : "−"}
-                                                {currency(transaction.amount)}
+                                                {formatCurrency(
+                                                    transaction.amount,
+                                                    currency,
+                                                )}
                                             </p>
 
                                             <div className="flex gap-1">
@@ -1216,10 +1233,9 @@ function TransactionsPage() {
                                 <select
                                     id="mobile-category"
                                     value={categoryId}
-                                    onChange={(event) => {
-                                        setCategoryId(event.target.value);
-                                        setPage(0);
-                                    }}
+                                    onChange={(event) =>
+                                        changeCategory(event.target.value)
+                                    }
                                     className="w-full rounded-xl border border-border bg-surface px-4 py-3.5 text-sm"
                                 >
                                     <option value="">All categories</option>

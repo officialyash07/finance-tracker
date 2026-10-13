@@ -8,6 +8,7 @@ import { useLogin } from "./useLogin";
 import { useAppDispatch } from "../../store/hooks";
 import { setAuthenticatedUser } from "./authSlice";
 import { loginSchema, type LoginFormData } from "./loginSchema";
+import { formatCurrency } from "../../utils/currency";
 
 const LoginPage = () => {
     const [showPassword, setShowPassword] = useState(false);
@@ -297,8 +298,7 @@ const LoginPage = () => {
                                 </p>
 
                                 <p className="mt-3 text-4xl font-semibold tracking-tight text-ink-950">
-                                    +$4,212
-                                    <span className="text-ink-400">.38</span>
+                                    +{formatCurrency(4212.38, "INR")}
                                 </p>
 
                                 {/* Bars */}

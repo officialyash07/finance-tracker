@@ -10,22 +10,13 @@ import {
 import { useNavigate } from "react-router-dom";
 
 import { useAppSelector } from "../../store/hooks";
+import { formatCurrency } from "../../utils/currency";
 import { useDashboardSummary, useMonthlySummary } from "./useDashboard";
 import MonthSelector from "./MonthSelector";
 import MonthlyIncomeExpenseChart from "./MonthlyIncomeExpenseChart";
 import MonthlySummaryCard from "./MonthlySummaryCard";
 import RecentTransactions from "./RecenetTransactions";
 import SpendingByCategory from "./SpendingByCategory";
-
-const currencyFormatter = (currency = "INR") =>
-    new Intl.NumberFormat("en-IN", {
-        style: "currency",
-        currency,
-        maximumFractionDigits: 2,
-    });
-
-const formatAmount = (amount: number, currency: string) =>
-    currencyFormatter(currency).format(amount);
 
 const formatMonth = (year: number, month: number, short = true) =>
     new Intl.DateTimeFormat("en", {
@@ -67,9 +58,11 @@ const MonthlyMetricCard = ({
     transactionCount,
 }: MonthlyMetricCardProps) => {
     const isIncome = type === "income";
+
     const percentageChange = getPercentageChange(amount, previousAmount);
 
     const increased = percentageChange !== null && percentageChange > 0;
+
     const decreased = percentageChange !== null && percentageChange < 0;
 
     // An income increase is positive; an expense increase is negative.
@@ -120,13 +113,13 @@ const MonthlyMetricCard = ({
                         <span
                             className={
                                 isIncome
-                                    ? "text-pos-700 mr-1"
-                                    : "text-neg-600 mr-1"
+                                    ? "mr-1 text-pos-700"
+                                    : "mr-1 text-neg-600"
                             }
                         >
                             {isIncome ? "+" : "−"}
                         </span>
-                        {formatAmount(amount, currency)}
+                        {formatCurrency(amount, currency)}
                     </p>
                 )}
             </div>
@@ -210,6 +203,7 @@ const DashboardPage = () => {
     };
 
     const isLoading = summaryQuery.isPending || monthlyQuery.isPending;
+
     const hasError = summaryQuery.isError || monthlyQuery.isError;
 
     return (
@@ -282,7 +276,7 @@ const DashboardPage = () => {
                         <div className="mt-7 wrap-break-word text-3xl font-semibold tracking-tight sm:text-4xl">
                             {isLoading
                                 ? "Loading..."
-                                : formatAmount(
+                                : formatCurrency(
                                       summaryQuery.data?.balance ?? 0,
                                       currency,
                                   )}
@@ -294,7 +288,7 @@ const DashboardPage = () => {
                                 <span className="font-medium text-emerald-300">
                                     {isLoading
                                         ? "—"
-                                        : formatAmount(
+                                        : formatCurrency(
                                               summaryQuery.data?.totalIncome ??
                                                   0,
                                               currency,
@@ -307,7 +301,7 @@ const DashboardPage = () => {
                                 <span className="font-medium text-red-300">
                                     {isLoading
                                         ? "—"
-                                        : formatAmount(
+                                        : formatCurrency(
                                               summaryQuery.data?.totalExpense ??
                                                   0,
                                               currency,
@@ -366,6 +360,7 @@ const DashboardPage = () => {
                     currency={currency}
                 />
             </div>
+
             <div className="mt-6 grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.9fr)]">
                 <RecentTransactions currency={currency} />
 

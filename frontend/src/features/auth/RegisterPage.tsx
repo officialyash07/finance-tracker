@@ -9,6 +9,7 @@ import { registerSchema, type RegisterFormData } from "./registerSchema";
 import { useRegister } from "./useRegister";
 import { useAppDispatch } from "../../store/hooks";
 import { setAuthenticatedUser } from "./authSlice";
+import { formatCurrency } from "../../utils/currency";
 
 const passwordRules = [
     {
@@ -59,6 +60,8 @@ const RegisterPage = () => {
     const password = useWatch({ control, name: "password" }) ?? "";
     const confirmPassword =
         useWatch({ control, name: "confirmPassword" }) ?? "";
+    const preferredCurrency =
+        useWatch({ control, name: "preferredCurrency" }) ?? "INR";
 
     const passedRules = passwordRules.filter((rule) =>
         rule.test(password),
@@ -602,8 +605,7 @@ const RegisterPage = () => {
                                 </p>
 
                                 <p className="mt-3 text-4xl font-semibold tracking-tight text-ink-950">
-                                    +$4,212
-                                    <span className="text-ink-400">.38</span>
+                                    +{formatCurrency(4212.38, preferredCurrency)}
                                 </p>
 
                                 <div className="mt-8 flex h-20 items-end gap-3">

@@ -1,3 +1,4 @@
+
 package com.pathik.financetracker.mapper;
 
 import com.pathik.financetracker.dto.category.CategoryResponse;
@@ -6,12 +7,14 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class CategoryMapper {
-    public CategoryResponse toResponse(Category category){
+
+    public CategoryResponse toResponse(Category category) {
         return new CategoryResponse(
                 category.getId(),
                 category.getCode(),
                 category.getName(),
-                category.getType()
+                category.getType(),
+                category.isActive()
         );
     }
 }

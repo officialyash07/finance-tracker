@@ -1,6 +1,5 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 
-import PlaceholderPage from "../pages/PlaceholderPage";
 import LoginPage from "../features/auth/LoginPage";
 import RegisterPage from "../features/auth/RegisterPage";
 import DashboardPage from "../features/dashboard/DashboardPage";
@@ -10,6 +9,8 @@ import ProtectedRoute from "./ProtectedRoute";
 import EditTransactionPage from "../features/transactions/EditTransactionPage";
 import TransactionsPage from "../features/transactions/TransactionsPage";
 import NewTransactionPage from "../features/transactions/NewTransactionPage";
+import CategoriesPage from "../features/categories/CategoriesPage";
+import ProfilePage from "../features/profile/ProfilePage";
 
 export const router = createBrowserRouter([
     {
@@ -49,11 +50,11 @@ export const router = createBrowserRouter([
                     },
                     {
                         path: "/categories",
-                        element: <PlaceholderPage title="Categories" />,
+                        element: <CategoriesPage />,
                     },
                     {
                         path: "/profile",
-                        element: <PlaceholderPage title="Profile" />,
+                        element: <ProfilePage />,
                     },
                 ],
             },

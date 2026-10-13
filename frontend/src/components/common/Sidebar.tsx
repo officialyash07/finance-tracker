@@ -148,7 +148,7 @@ const Sidebar = () => {
                             type="button"
                             onClick={() => {
                                 setProfileMenuOpen(false);
-                                navigate("/profile");
+                                navigate("/profile?tab=security");
                             }}
                             className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-ink-700 hover:bg-canvas"
                         >

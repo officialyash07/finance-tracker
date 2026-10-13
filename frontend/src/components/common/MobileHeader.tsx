@@ -138,7 +138,9 @@ const MobileHeader = () => {
 
                             <button
                                 type="button"
-                                onClick={() => navigateTo("/profile")}
+                                onClick={() =>
+                                    navigateTo("/profile?tab=security")
+                                }
                                 className="flex min-h-21 w-full items-center gap-5 px-4 text-left text-lg text-ink-900 transition hover:bg-canvas"
                             >
                                 <KeyRound size={27} strokeWidth={1.8} />

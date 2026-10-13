@@ -17,6 +17,11 @@ import TransactionCategoryIcon from "./TransactionCategoryIcon";
 
 import type { Transaction, TransactionType } from "../../types/transaction";
 import type { Category, CategoryType } from "../../types/category";
+import { useAppSelector } from "../../store/hooks";
+import {
+    formatCurrency,
+    getCurrencySymbol,
+} from "../../utils/currency";
 
 export interface TransactionFormValues {
     type: TransactionType;
@@ -37,13 +42,6 @@ interface TransactionFormProps {
     isDeleting?: boolean;
     submitError?: string;
 }
-
-const formatCurrency = (amount: number): string =>
-    new Intl.NumberFormat("en-IN", {
-        style: "currency",
-        currency: "INR",
-        maximumFractionDigits: 2,
-    }).format(amount);
 
 const formatDate = (date: string): string => {
     if (!date) return "Select a date";
@@ -92,6 +90,8 @@ export default function TransactionForm({
     isDeleting = false,
     submitError = "",
 }: TransactionFormProps) {
+    const currency =
+        useAppSelector((state) => state.auth.user?.preferredCurrency) || "INR";
     const [type, setType] = useState<TransactionType>(
         initialValues?.type ?? transaction?.type ?? "EXPENSE",
     );
@@ -257,7 +257,7 @@ export default function TransactionForm({
 
                             <div className="flex items-center rounded-xl border border-border bg-canvas transition focus-within:border-brand-600 focus-within:ring-2 focus-within:ring-brand-100">
                                 <span className="pl-4 text-lg font-medium text-ink-400">
-                                    ₹
+                                    {getCurrencySymbol(currency)}
                                 </span>
                                 <input
                                     id="transaction-amount"
@@ -275,7 +275,7 @@ export default function TransactionForm({
                                 />
                             </div>
                             <p className="mt-2 text-xs text-ink-500">
-                                Enter the amount in Indian Rupees (INR).
+                                Enter the amount in {currency}.
                             </p>
                         </div>
 
@@ -500,6 +500,7 @@ export default function TransactionForm({
                                             amount !== ""
                                             ? Math.max(numericAmount, 0)
                                             : 0,
+                                        currency,
                                     )}
                                 </p>
                                 <div className="mt-4 flex items-center gap-2 text-xs text-ink-500">
