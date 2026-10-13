@@ -7,6 +7,9 @@ import DashboardPage from "../features/dashboard/DashboardPage";
 import AppLayout from "../layouts/AppLayout";
 import AuthLayout from "../layouts/AuthLayout";
 import ProtectedRoute from "./ProtectedRoute";
+import EditTransactionPage from "../features/transactions/EditTransactionPage";
+import TransactionsPage from "../features/transactions/TransactionsPage";
+import NewTransactionPage from "../features/transactions/NewTransactionPage";
 
 export const router = createBrowserRouter([
     {
@@ -34,15 +37,15 @@ export const router = createBrowserRouter([
                     },
                     {
                         path: "/transactions",
-                        element: <PlaceholderPage title="Transactions" />,
+                        element: <TransactionsPage />,
                     },
                     {
                         path: "/transactions/new",
-                        element: <PlaceholderPage title="New Transaction" />,
+                        element: <NewTransactionPage />,
                     },
                     {
                         path: "/transactions/:id/edit",
-                        element: <PlaceholderPage title="Edit Transaction" />,
+                        element: <EditTransactionPage />,
                     },
                     {
                         path: "/categories",

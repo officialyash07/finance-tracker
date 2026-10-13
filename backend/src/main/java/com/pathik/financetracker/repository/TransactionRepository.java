@@ -29,23 +29,23 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
 //    UUID user(User user);
 
     @Query("""
-        SELECT t
-        FROM Transaction t
-        WHERE t.user.id = :userId
-          AND (:type IS NULL OR t.transactionType = :type)
-          AND (:categoryId IS NULL OR t.category.id = :categoryId)
-          AND (:fromDate IS NULL OR t.transactionDate >= :fromDate)
-          AND (:toDate IS NULL OR t.transactionDate <= :toDate)
-        """)
+    SELECT t
+    FROM Transaction t
+    WHERE t.user.id = :userId
+      AND (:type IS NULL OR t.transactionType = :type)
+      AND (:categoryId IS NULL OR t.category.id = :categoryId)
+      AND (CAST(:fromDate AS date) IS NULL OR t.transactionDate >= :fromDate)
+      AND (CAST(:toDate AS date) IS NULL OR t.transactionDate <= :toDate)
+    """)
     @EntityGraph(attributePaths = "category")
     Page<Transaction> findTransactions(
             @Param("userId") UUID userId,
-            @Param("type")TransactionType type,
+            @Param("type") TransactionType type,
             @Param("categoryId") UUID categoryId,
             @Param("fromDate") LocalDate fromDate,
-            @Param("toDate") LocalDate  toDate,
+            @Param("toDate") LocalDate toDate,
             Pageable pageable
-            );
+    );
 
     UUID user(User user);
 

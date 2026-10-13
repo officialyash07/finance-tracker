@@ -3,16 +3,12 @@ import type {
     LoginRequest,
     LoginResponse,
     RegisterRequest,
-    UserResponse,
 } from "../types/auth";
 
-export async function register(
-    request: RegisterRequest,
-): Promise<UserResponse> {
-    const response = await apiClient.post<UserResponse>(
-        "/auth/register",
-        request,
-    );
+import type { User } from "../types/user";
+
+export async function register(request: RegisterRequest): Promise<User> {
+    const response = await apiClient.post<User>("/auth/register", request);
 
     return response.data;
 }
