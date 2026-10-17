@@ -540,6 +540,17 @@ const RegisterPage = () => {
                                         ? "Creating account..."
                                         : "Create account"}
                                 </button>
+                                {registerMutation.isPending &&
+                                    import.meta.env.PROD && (
+                                        <p
+                                            className="text-center text-sm text-ink-500"
+                                            role="status"
+                                        >
+                                            If the server has been idle, its
+                                            first response can take a little
+                                            longer. Please keep this page open.
+                                        </p>
+                                    )}
                             </form>
 
                             <p className="mt-6 text-center text-sm text-ink-500">

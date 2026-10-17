@@ -3,10 +3,10 @@ package com.pathik.financetracker.controller;
 import com.pathik.financetracker.dto.auth.*;
 import com.pathik.financetracker.service.LoginResult;
 import com.pathik.financetracker.service.UserService;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -18,6 +18,9 @@ public class AuthController {
 
     @Value("${app.auth.cookie-secure:false}")
     private boolean cookieSecure;
+
+    @Value("${app.auth.cookie-same-site:Lax}")
+    private String cookieSameSite;
 
     private final UserService userService;
 
@@ -33,13 +36,7 @@ public class AuthController {
     ) {
         RegistrationResult result = userService.register(request);
 
-        Cookie cookie = new Cookie(ACCESS_TOKEN_COOKIE, result.accessToken());
-        cookie.setHttpOnly(true);
-        cookie.setSecure(cookieSecure);
-        cookie.setPath("/");
-        cookie.setMaxAge(Math.toIntExact(result.expiresIn()));
-
-        response.addCookie(cookie);
+        addAccessTokenCookie(response, result.accessToken(), result.expiresIn());
 
         return result.user();
     }
@@ -52,14 +49,7 @@ public class AuthController {
     ) {
         LoginResult result = userService.login(request);
 
-        Cookie cookie = new Cookie(ACCESS_TOKEN_COOKIE, result.accessToken());
-
-        cookie.setHttpOnly(true);
-        cookie.setSecure(cookieSecure);
-        cookie.setPath("/");
-        cookie.setMaxAge(Math.toIntExact(result.expiresIn()));
-
-        response.addCookie(cookie);
+        addAccessTokenCookie(response, result.accessToken(), result.expiresIn());
 
         return new LoginResponse(result.expiresIn());
     }
@@ -67,13 +57,22 @@ public class AuthController {
     @PostMapping("/logout")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void logout(HttpServletResponse response) {
-        Cookie cookie = new Cookie(ACCESS_TOKEN_COOKIE, "");
+        addAccessTokenCookie(response, "", 0);
+    }
 
-        cookie.setHttpOnly(true);
-        cookie.setSecure(cookieSecure);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
+    private void addAccessTokenCookie(
+            HttpServletResponse response,
+            String token,
+            long maxAgeSeconds
+    ) {
+        ResponseCookie cookie = ResponseCookie.from(ACCESS_TOKEN_COOKIE, token)
+                .httpOnly(true)
+                .secure(cookieSecure)
+                .path("/")
+                .maxAge(maxAgeSeconds)
+                .sameSite(cookieSameSite)
+                .build();
 
-        response.addCookie(cookie);
+        response.addHeader("Set-Cookie", cookie.toString());
     }
 }

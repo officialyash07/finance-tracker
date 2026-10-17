@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, LockKeyhole, ShieldCheck } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
-import { useLogin } from "./useLogin";
+import { SessionEstablishmentError, useLogin } from "./useLogin";
 import { useAppDispatch } from "../../store/hooks";
 import { setAuthenticatedUser } from "./authSlice";
 import { loginSchema, type LoginFormData } from "./loginSchema";
@@ -40,6 +40,11 @@ const LoginPage = () => {
             // Error is exposed through loginMutation.isError
         }
     };
+
+    const loginErrorMessage =
+        loginMutation.error instanceof SessionEstablishmentError
+            ? "You were signed in, but your session could not be started. Check that cookies are enabled and try again."
+            : "Unable to log in. Please check your email and password.";
 
     return (
         <main className="min-h-screen bg-white">
@@ -80,16 +85,15 @@ const LoginPage = () => {
                             </div>
 
                             <form
-                                onSubmit={(event) => {
-                                    console.log("FORM SUBMITTED");
-                                    handleSubmit(onSubmit)(event);
-                                }}
+                                onSubmit={handleSubmit(onSubmit)}
                                 className="space-y-6"
                             >
                                 {loginMutation.isError && (
-                                    <div className="mb-6 rounded-lg border border-neg-100 bg-neg-50 px-4 py-3 text-sm text-neg-700">
-                                        Unable to log in. Please check your
-                                        email and password.
+                                    <div
+                                        className="mb-6 rounded-lg border border-neg-100 bg-neg-50 px-4 py-3 text-sm text-neg-700"
+                                        role="alert"
+                                    >
+                                        {loginErrorMessage}
                                     </div>
                                 )}
 
@@ -227,6 +231,17 @@ const LoginPage = () => {
                                         ? "Logging in..."
                                         : "Log in"}
                                 </button>
+                                {loginMutation.isPending &&
+                                    import.meta.env.PROD && (
+                                        <p
+                                            className="text-center text-sm text-ink-500"
+                                            role="status"
+                                        >
+                                            If the server has been idle, its
+                                            first response can take a little
+                                            longer. Please keep this page open.
+                                        </p>
+                                    )}
                             </form>
 
                             {/* Register */}
