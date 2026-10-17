@@ -3,9 +3,11 @@ import { Outlet } from "react-router-dom";
 import Sidebar from "../components/common/Sidebar";
 import MobileNavigation from "../components/common/MobileNavigation";
 import MobileHeader from "../components/common/MobileHeader";
+import PageTitle from "../routes/PageTitle";
 
 const AppLayout = () => (
     <div className="h-screen overflow-hidden bg-canvas">
+        <PageTitle />
         {/* Mobile header */}
         <MobileHeader />
 
